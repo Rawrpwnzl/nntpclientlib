@@ -229,7 +229,7 @@ namespace NntpClientLib
         /// <param name="useSsl">Connect with SSL</param>
         public virtual void Connect(string hostName, int port, bool useSsl)
         {
-            Open(hostName, port);
+            Open(hostName, port, useSsl);
 
             NntpReaderWriter.ReadResponse();
             if (NntpReaderWriter.LastResponseCode == Rfc977ResponseCodes.ServerReadyPostingAllowed)
