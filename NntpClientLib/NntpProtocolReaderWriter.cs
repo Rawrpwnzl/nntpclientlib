@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
 using System.Runtime.InteropServices;
@@ -15,6 +16,9 @@ namespace NntpClientLib
         private NntpStreamReader m_reader;
         private TextWriter m_log;
 
+        private bool m_useSsl;
+        private String m_sslSslHostName;
+
         public TextWriter LogWriter
         {
             get { return m_log; }
@@ -27,13 +31,35 @@ namespace NntpClientLib
             get { return m_enc; }
         }
 
-        internal NntpProtocolReaderWriter(TcpClient connection)
+        internal NntpProtocolReaderWriter(TcpClient connection )
+        {
+            m_useSsl = false;
+            Initialize(connection);
+        }
+        
+        internal NntpProtocolReaderWriter(TcpClient connection, string sslHostName )
+        {
+            m_useSsl = true;
+            m_sslSslHostName = sslHostName;
+
+            Initialize(connection);
+        }
+
+        internal void Initialize(TcpClient connection)
         {
             m_connection = connection;
             m_network = m_connection.GetStream();
-            m_writer = new StreamWriter(m_network, DefaultTextEncoding);
+
+            var stream = m_network;
+            if( m_useSsl )
+            {
+                var sslClient = new SslStream(m_network);
+                sslClient.AuthenticateAsClient(m_sslSslHostName);
+            }
+
+            m_writer = new StreamWriter(stream, DefaultTextEncoding);
             m_writer.AutoFlush = true;
-            m_reader = new NntpStreamReader(m_network);
+            m_reader = new NntpStreamReader(stream);
         }
 
         internal string ReadLine()

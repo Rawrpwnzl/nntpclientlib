@@ -64,7 +64,18 @@ namespace NntpClientLib
         /// <param name="port">The port.</param>
         public override void Connect(string hostName, int port)
         {
-            base.Connect(hostName, port);
+            Connect(hostName,port,false);
+        }
+
+        /// <summary>
+        /// Connects using the specified host name and port number.
+        /// </summary>
+        /// <param name="hostName">Name of the host.</param>
+        /// <param name="port">The port.</param>
+        /// <param name="useSsl">Connect with SSL</param>
+        public override void Connect(string hostName, int port, bool useSsl)
+        {
+            base.Connect(hostName, port, useSsl);
             CheckToSupportedExtensions();
         }
 
@@ -77,7 +88,20 @@ namespace NntpClientLib
         /// <param name="password">The password.</param>
         public virtual void Connect(string hostName, int port, string userName, string password)
         {
-            base.Connect(hostName,port);
+            Connect(hostName,port,userName,password,true);
+        }
+
+        /// <summary>
+        /// Connects the specified host name.
+        /// </summary>
+        /// <param name="hostName">Name of the host.</param>
+        /// <param name="port">The port.</param>
+        /// <param name="userName">Name of the user.</param>
+        /// <param name="password">The password.</param>
+        /// <param name="useSsl">Connect with SSL</param>
+        public virtual void Connect(string hostName, int port, string userName, string password, bool useSsl)
+        {
+            base.Connect(hostName, port, useSsl);
             AuthenticateUser(userName, password);
 
             CheckToSupportedExtensions();

@@ -132,6 +132,11 @@ namespace NntpClientLib
         }
 
         /// <summary>
+        /// Gets the SSL setting
+        /// </summary>
+        public bool m_ssl { get; private set; }
+
+        /// <summary>
         /// Gets a value indicating whether this <see cref="Rfc977NntpClient"/> is connected.
         /// </summary>
         /// <value><c>true</c> if connected; otherwise, <c>false</c>.</value>
@@ -186,7 +191,24 @@ namespace NntpClientLib
         /// <param name="hostName">Name of the host.</param>
         public void Connect(string hostName)
         {
-            Connect(hostName, 119);
+            Connect(hostName, false);
+        }
+
+        /// <summary>
+        /// Connects using the specified host name.
+        /// </summary>
+        /// <param name="hostName">Name of the host.</param>
+        /// <param name="useSsl">Connect with SSL</param>
+        public void Connect(string hostName, bool useSsl)
+        {
+            if (useSsl)
+            {
+                Connect(hostName, 563, true);
+            }
+            else
+            {
+                Connect(hostName, 119, false);
+            }
         }
 
         /// <summary>
@@ -195,6 +217,17 @@ namespace NntpClientLib
         /// <param name="hostName">Name of the host.</param>
         /// <param name="port">The port.</param>
         public virtual void Connect(string hostName, int port)
+        {
+            Connect(hostName,port,false);
+        }
+        
+        /// <summary>
+        /// Connects using the specified host name and port number.
+        /// </summary>
+        /// <param name="hostName">Name of the host.</param>
+        /// <param name="port">The port.</param>
+        /// <param name="useSsl">Connect with SSL</param>
+        public virtual void Connect(string hostName, int port, bool useSsl)
         {
             Open(hostName, port);
 
@@ -220,15 +253,36 @@ namespace NntpClientLib
         /// <param name="port">The port.</param>
         protected virtual void Open(string hostName, int port)
         {
+            Open(hostName,port,false);
+        }
+
+        /// <summary>
+        /// Opens the specified host name.
+        /// </summary>
+        /// <param name="hostName">Name of the host.</param>
+        /// <param name="port">The port.</param>
+        /// <param name="useSsl">Connect with SSL</param>
+        protected virtual void Open(string hostName, int port, bool useSsl)
+        {
             m_host = hostName;
             m_port = port;
+            m_ssl = useSsl;
             if (string.IsNullOrEmpty(hostName))
             {
                 throw new ArgumentNullException("hostName");
             }
 
             m_connection = new TcpClient(hostName, port);
-            NntpReaderWriter = new NntpProtocolReaderWriter(m_connection);
+
+            if (m_ssl)
+            {
+                NntpReaderWriter = new NntpProtocolReaderWriter(m_connection, hostName);
+            }
+            else
+            {
+                NntpReaderWriter = new NntpProtocolReaderWriter(m_connection);
+            }
+
             if (m_logger != null)
             {
                 NntpReaderWriter.LogWriter = m_logger;
