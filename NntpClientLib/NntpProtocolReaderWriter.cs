@@ -11,7 +11,7 @@ namespace NntpClientLib
     internal class NntpProtocolReaderWriter : IDisposable
     {
         private TcpClient m_connection;
-        private NetworkStream m_network;
+        private Stream m_network;
         private StreamWriter m_writer;
         private NntpStreamReader m_reader;
         private TextWriter m_log;
@@ -55,6 +55,7 @@ namespace NntpClientLib
             {
                 var sslClient = new SslStream(m_network);
                 sslClient.AuthenticateAsClient(m_sslSslHostName);
+                stream = sslClient;
             }
 
             m_writer = new StreamWriter(stream, DefaultTextEncoding);
